@@ -19,9 +19,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/benbjohnson/litestream/internal"
+	_ "modernc.org/sqlite"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/srilekha98/litestream/internal"
 )
 
 // Default DB settings.
@@ -415,7 +417,7 @@ func (db *DB) init() (err error) {
 
 	// Connect to SQLite database. Use the driver registered with a hook to
 	// prevent WAL files from being removed.
-	if db.db, err = sql.Open("litestream-sqlite3", dsn); err != nil {
+	if db.db, err = sql.Open("sqlite", dsn); err != nil {
 		return err
 	}
 
@@ -1486,8 +1488,8 @@ func applyWAL(ctx context.Context, index int, dbPath string) error {
 		return err
 	}
 
-	// Open SQLite database and force a truncating checkpoint.
-	d, err := sql.Open("sqlite3", dbPath)
+	// Open SQLite database and force a truncating checkpoint
+	d, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return err
 	}
