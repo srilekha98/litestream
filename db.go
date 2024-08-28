@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"modernc.org/sqlite"
 	_ "modernc.org/sqlite"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -420,6 +421,27 @@ func (db *DB) init() (err error) {
 	if db.db, err = sql.Open("sqlite", dsn); err != nil {
 		return err
 	}
+	if _, err = db.db.Exec("PRAGMA busy_timeout = 1000;"); err != nil {
+		return err
+	}
+	if _, err = db.db.Exec("PRAGMA locking_mode = NORMAL;"); err != nil {
+		return err
+	}
+	if _, err = db.db.Exec("PRAGMA synchronous = NORMAL;"); err != nil {
+		return err
+	}
+	conn, err := db.db.Conn(context.Background())
+	if err != nil {
+		return err
+	}
+	err = conn.Raw(func(dc any) error {
+		fc, _ := dc.(sqlite.FileControl)
+		_, err := fc.FileControlPersistWAL("main", 1)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 
 	// Open long-running database file descriptor. Required for non-OFD locks.
 	if db.f, err = os.Open(db.path); err != nil {

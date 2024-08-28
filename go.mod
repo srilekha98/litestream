@@ -16,7 +16,7 @@ require (
 	golang.org/x/sys v0.22.0
 	google.golang.org/api v0.154.0
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.31.1
+	modernc.org/sqlite v1.32.0
 )
 
 require (
